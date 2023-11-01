@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import LoadingSpnner from "./LoadingSpnner";
+import LoadingSpinner from "./LoadingSpinner";
 import { IImage } from "../interface";
 import MessageElement from "./MessageElement";
+import { deleteImages, getImages } from "../api";
 
 const Gallery = () => {
   const queryClient = useQueryClient();
@@ -14,19 +12,12 @@ const Gallery = () => {
   //fetch images
   const { isPending, isError, data } = useQuery({
     queryKey: ["images"],
-    queryFn: async () => {
-      const res = await axios.get(
-        `${import.meta.env.VITE_SERVER_BASE_URL}/image`
-      );
-      return res.data?.data;
-    },
+    queryFn: getImages,
   });
 
   //delete images
-  const { mutateAsync: deleteImage } = useMutation({
-    mutationFn: (data: any) => {
-      return axios.put(`${import.meta.env.VITE_SERVER_BASE_URL}/image`, data);
-    },
+  const { mutateAsync: deleteImage, isPending: deletePending } = useMutation({
+    mutationFn: deleteImages,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["images"] });
     },
@@ -41,10 +32,16 @@ const Gallery = () => {
     }
   };
 
+  //handle imagesdeletion
+  const handleImageDeletion = async () => {
+    await deleteImage(selectedImage);
+    setSeletedImage([]);
+  };
+
   //decide what to render
   let content;
   if (isPending) {
-    content = <LoadingSpnner />;
+    content = <LoadingSpinner />;
   } else if (!isPending && isError) {
     content = <MessageElement message=" Failed to fetch images" />;
   } else if (!isPending && !isError && data?.length === 0) {
@@ -72,17 +69,23 @@ const Gallery = () => {
 
   return (
     <div>
-      <button onClick={() => deleteImage(selectedImage)}>Delete</button>
       {selectedImage.length > 0 && (
         <div className="flex gap-3 my-2">
           <p className="font-bold">
             Total {selectedImage.length} images selected
           </p>
           <button
-            className="bg-red-400 px-2 text-white text-sm rounded-full"
+            className="bg-blue-400 px-2 text-white text-sm rounded-full"
             onClick={() => setSeletedImage([])}
           >
             Clear
+          </button>
+          <button
+            className="bg-red-400 px-2 text-white text-sm rounded-full"
+            onClick={handleImageDeletion}
+            disabled={deletePending}
+          >
+            {deletePending ? "Deleting..." : "Delete"}
           </button>
         </div>
       )}

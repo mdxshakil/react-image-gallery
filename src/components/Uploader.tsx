@@ -1,29 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
 import { uploadImageToCloudinary } from "../utils/uploader";
+import { uploadNewImage } from "../api";
 
 const Uploader = () => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  //upload image link to database
+  //upload image to database
   const {
     mutateAsync: uploadImage,
     isPending,
     isError,
   } = useMutation({
-    mutationFn: (data: any) => {
-      return axios.post(`${import.meta.env.VITE_SERVER_BASE_URL}/image`, data);
-    },
+    mutationFn: uploadNewImage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["images"] });
     },
   });
 
-  //   handle form submit
+  //handle form submit
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -31,6 +29,11 @@ const Uploader = () => {
       const result = await uploadImageToCloudinary(image);
       await uploadImage({ imageSrc: result.url });
       setLoading(false);
+      setImage(null);
+      // Clear the input field by resetting its value
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (error) {
       setLoading(false);
     }
@@ -46,6 +49,7 @@ const Uploader = () => {
           <input
             type="file"
             accept="image/png, image/jpg, image/jpeg"
+            ref={fileInputRef}
             required
             onChange={(e) => {
               const selectedFile = e.target.files?.[0];
@@ -60,7 +64,7 @@ const Uploader = () => {
             className="text-sm bg-blue-500 text-white rounded-full hover:bg-blue-700 hover:cursor-pointer px-2 py-1"
             disabled={loading || isPending}
           >
-            {loading || isPending ? "Please Wait....." : "Upload"}
+            {loading || isPending ? "Uploading..." : "Upload"}
           </button>
         </div>
       </form>
