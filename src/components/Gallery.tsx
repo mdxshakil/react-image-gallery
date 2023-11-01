@@ -68,7 +68,7 @@ const Gallery = () => {
   }
 
   return (
-    <div>
+    <div className="py-12 my-2">
       {selectedImage.length > 0 && (
         <div className="flex gap-3 my-2">
           <p className="font-bold">

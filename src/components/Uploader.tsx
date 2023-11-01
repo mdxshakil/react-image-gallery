@@ -42,10 +42,10 @@ const Uploader = () => {
   return (
     <>
       <form
-        className="flex items-center justify-center"
+        className="flex items-center justify-center px-2"
         onSubmit={handleSubmit}
       >
-        <div className="border-2 p-1 rounded-full bg-gray-200">
+        <div className="border-2 p-1 rounded-full bg-gray-200 flex items-center justify-between">
           <input
             type="file"
             accept="image/png, image/jpg, image/jpeg"
@@ -57,7 +57,7 @@ const Uploader = () => {
                 setImage(selectedFile);
               }
             }}
-            className="text-sm text-stone-500 file:mr-5 file:py-1 file:px-3 file:border-none file:text-xs file:font-medium file:bg-stone-300 file:rounded-full file:text-stone-700 hover:file:cursor-pointer hover:file:bg-blue-50 hover:file:text-blue-700"
+            className="text-sm text-stone-500 file:py-1 file:border-none file:text-xs file:font-medium file:bg-stone-300 file:rounded-full file:text-stone-700 hover:file:cursor-pointer hover:file:bg-blue-50 hover:file:text-blue-700 w-2/3 md:w-full"
           />
           <button
             type="submit"
